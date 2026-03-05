@@ -1,17 +1,12 @@
-# Base Streamlit and Data Processing
+# Use latest versions for Python 3.13 compatibility
+spacy>=3.7.0
+blis>=0.7.11
+thinc>=8.2.5
+numpy<2.0.0
 streamlit
 pandas
 matplotlib
 networkx
-regex
-
-# NLP and Topic Modeling
-spacy>=3.0.0,<4.0.0
-gensim
-
-# Deep Learning for GPT-2
 torch
 transformers
-
-# Direct link to the spaCy English model for automatic installation
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.0/en_core_web_sm-3.7.0-py3-none-any.whl
