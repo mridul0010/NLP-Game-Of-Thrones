@@ -1,0 +1,10 @@
+streamlit
+pandas
+numpy
+regex
+spacy
+networkx
+matplotlib
+gensim
+transformers
+torch
