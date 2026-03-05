@@ -171,8 +171,8 @@ with tab3:
 # GPT-2 GENERATOR
 # --------------------------------------------------
 
-with tab4:
 
+with tab4:
     st.subheader("GPT-2 Story Generator")
 
     prompt = st.text_area(
@@ -180,22 +180,27 @@ with tab4:
         "The night was cold and the wall stood silent..."
     )
 
-    max_len = st.slider(
-        "Story Length",
-        50,
-        200,
-        120
-    )
+    # UI Controls for dynamic parameters
+    col1, col2 = st.columns(2)
+    with col1:
+        # Match argument name 'temperature' from generator.py
+        temp_val = st.slider("Temperature (Creativity)", 0.1, 1.5, 0.9, 0.1)
+        max_len = st.slider("Story Length", 50, 500, 120)
+    
+    with col2:
+        top_k_val = st.slider("Top K", 1, 100, 50)
+        top_p_val = st.slider("Top P (Nucleus Sampling)", 0.0, 1.0, 0.95, 0.05)
 
     if st.button("Generate Story"):
-
-        with st.spinner("Generating story..."):
-
+        with st.spinner("The maesters are forging the text..."):
+            # CORRECTION: Passing temperature, top_k, and top_p to match your generator.py
             result = generate_text(
                 prompt,
                 tokenizer,
                 model,
-                max_len
+                max_len,
+                temperature=temp_val, 
+                top_k=top_k_val,
+                top_p=top_p_val
             )
-
         st.success(result)
