@@ -20,7 +20,9 @@
 - [Understanding LDA Topic Modeling](#-understanding-lda-topic-modeling)
   - [What Is LDA?](#what-is-lda)
   - [How LDA Works](#how-lda-works)
+  - [The Math Behind LDA](#the-math-behind-lda)
   - [LDA in This Project](#lda-in-this-project)
+  - [Interpreting LDA Results](#interpreting-lda-results)
 - [Understanding the Generation Controls](#-understanding-the-generation-controls)
   - [Temperature](#temperature)
   - [Top-K Sampling](#top-k-sampling)
@@ -28,6 +30,8 @@
   - [How They Work Together](#how-they-work-together)
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
+- [Live Demo](#-live-demo)
+- [Screenshots](#-screenshots)
 - [Usage](#-usage)
 - [Tech Stack](#-tech-stack)
 - [License](#-license)
@@ -83,6 +87,25 @@ LDA follows a generative probabilistic process:
 | **Document–topic distribution** | How much each document "belongs" to each topic |
 | **Word–topic distribution** | How strongly each word is associated with each topic |
 
+### The Math Behind LDA
+
+LDA is a Bayesian generative model built on the **Dirichlet distribution** — a probability distribution over probability distributions. At its core, LDA assumes the following data-generating process for a corpus of **M** documents, each containing **N** words:
+
+1. For each topic **k** ∈ {1, …, K}, draw a word distribution **φ_k ~ Dirichlet(β)**
+2. For each document **d** ∈ {1, …, M}:
+   - Draw a topic distribution **θ_d ~ Dirichlet(α)**
+   - For each word position **n** ∈ {1, …, N_d}:
+     - Draw a topic assignment **z_{d,n} ~ Multinomial(θ_d)**
+     - Draw a word **w_{d,n} ~ Multinomial(φ_{z_{d,n}})**
+
+| Parameter | Role | Effect |
+|-----------|------|--------|
+| **α** (alpha) | Controls the document–topic density | A **low α** produces documents dominated by few topics; a **high α** produces documents that are a uniform mixture of many topics |
+| **β** (beta) | Controls the topic–word density | A **low β** produces topics focused on a small set of words; a **high β** produces topics that spread probability across many words |
+| **K** | Number of topics | Determines the granularity of discovered themes |
+
+> **Why "Dirichlet"?** The Dirichlet distribution is the conjugate prior for the multinomial distribution, which makes Bayesian inference tractable. It naturally produces sparse distributions — exactly what we want when most documents cover only a few topics and most topics use only a subset of the vocabulary.
+
 ### LDA in This Project
 
 The full preprocessing and training pipeline (implemented in `got.ipynb`) works as follows:
@@ -97,6 +120,15 @@ The full preprocessing and training pipeline (implemented in `got.ipynb`) works 
 | **Serialization** | The trained model (`lda_model.joblib`) and dictionary (`lda_dictionary.joblib`) are saved to the `models/` directory |
 
 At runtime the Streamlit dashboard loads the pre-trained model and lets you **interactively choose 2–10 topics** with a sidebar slider. For each topic, the top 10 most representative words are displayed so you can interpret the underlying theme.
+
+### Interpreting LDA Results
+
+Understanding LDA output is as important as running the model. Here are practical guidelines:
+
+- **Coherent topics** — A good topic should contain words that a human can easily group under a single label. For example, a topic with *lord, castle, knight, sword, battle* clearly relates to warfare and feudalism.
+- **Topic count selection** — Start with a small K (3–5) and increase gradually. If topics begin to overlap heavily or contain unrelated words, you have too many.
+- **Word probabilities** — Words at the top of each topic's list have the highest probability. These "anchor words" define the topic; words further down add nuance.
+- **Stopword influence** — If generic words dominate your topics, additional stopword removal or stricter dictionary filtering may be needed.
 
 > **Tip:** Try different topic counts to see how themes split or merge. With fewer topics you get broad themes (e.g., "battles" vs. "politics"); with more topics, finer-grained distinctions appear (e.g., individual character arcs).
 
@@ -227,19 +259,18 @@ The dashboard will open at `http://localhost:8501`.
 
 ---
 
-### **Project Link**
-```bash
-https://nlp-game-of-thrones.streamlit.app/
-```
+### 🌐 Live Demo
+
+👉 **[nlp-game-of-thrones.streamlit.app](https://nlp-game-of-thrones.streamlit.app/)**
 
 ---
 
-### **📊 Screenshots**
+### 📊 Screenshots
 
-
-
+*Screenshots coming soon — run the dashboard locally or visit the [live demo](https://nlp-game-of-thrones.streamlit.app/) to see it in action.*
 
 ---
+
 ## 🖥️ Usage
 
 1. **Statistics tab** — Browse text metrics and visualize the most frequent words.
@@ -266,14 +297,20 @@ https://nlp-game-of-thrones.streamlit.app/
 
 ---
 
-Mridul Lata
+## 📝 License
 
-📍 Jaipur, India
+This project is licensed under the **GNU General Public License v3.0** — see the [LICENSE](./LICENSE) file for details.
 
-💼 Aspiring Data Scientist
+---
 
-🔗 www.linkedin.com/in/mridullata
+<div align="center">
 
-🔗 https://github.com/mridul0010/NLP-Game-Of-Thrones
+**Made by [Mridul Lata](https://github.com/mridul0010)**
 
-🔗 https://nlp-game-of-thrones.streamlit.app/
+📍 Jaipur, India · 💼 Aspiring Data Scientist
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-mridullata-blue?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/mridullata)
+[![GitHub](https://img.shields.io/badge/GitHub-mridul0010-181717?logo=github&logoColor=white)](https://github.com/mridul0010/NLP-Game-Of-Thrones)
+[![Streamlit App](https://img.shields.io/badge/Streamlit-Live%20App-FF4B4B?logo=streamlit&logoColor=white)](https://nlp-game-of-thrones.streamlit.app/)
+
+</div>
