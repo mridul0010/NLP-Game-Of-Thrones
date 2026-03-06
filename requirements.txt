@@ -1,12 +1,21 @@
-# Use latest versions for Python 3.13 compatibility
-spacy>=3.7.0
-blis>=0.7.11
-thinc>=8.2.5
-numpy<2.0.0
+# --- Core Frameworks ---
 streamlit
 pandas
 matplotlib
 networkx
+regex
+
+# --- NLP & Text Processing ---
+nltk
+gensim
+spacy>=3.7.0
+# Direct link ensures the model is installed as a package
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.0/en_core_web_sm-3.7.0-py3-none-any.whl
+
+# --- Machine Learning & Math ---
+# Note: numpy < 2.0.0 is critical for older versions of Spacy/Gensim
+numpy>=1.26.0,<2.0.0
+blis>=0.7.11
+thinc>=8.2.5
 torch
 transformers
-https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.0/en_core_web_sm-3.7.0-py3-none-any.whl
