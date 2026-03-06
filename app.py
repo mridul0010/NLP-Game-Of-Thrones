@@ -10,6 +10,10 @@ from utils.network import load_character_graph
 from utils.topic_model import run_lda
 from utils.generator import load_generator, generate_text
 
+
+import spacy.cli
+spacy.cli.download("en_core_web_sm")
+
 # --------------------------------------------------
 # PAGE CONFIG
 # --------------------------------------------------
@@ -232,3 +236,4 @@ with tab4:
 
             st.success("Story Generated!")
             st.write(result)
+
