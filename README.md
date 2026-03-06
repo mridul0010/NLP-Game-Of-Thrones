@@ -87,23 +87,6 @@ LDA follows a generative probabilistic process:
 | **Document–topic distribution** | How much each document "belongs" to each topic |
 | **Word–topic distribution** | How strongly each word is associated with each topic |
 
-### The Math Behind LDA
-
-LDA is a Bayesian generative model built on the **Dirichlet distribution** — a probability distribution over probability distributions. At its core, LDA assumes the following data-generating process for a corpus of **M** documents, each containing **N** words:
-
-1. For each topic **k** ∈ {1, …, K}, draw a word distribution **φ_k ~ Dirichlet(β)**
-2. For each document **d** ∈ {1, …, M}:
-   - Draw a topic distribution **θ_d ~ Dirichlet(α)**
-   - For each word position **n** ∈ {1, …, N_d}:
-     - Draw a topic assignment **z_{d,n} ~ Multinomial(θ_d)**
-     - Draw a word **w_{d,n} ~ Multinomial(φ_{z_{d,n}})**
-
-| Parameter | Role | Effect |
-|-----------|------|--------|
-| **α** (alpha) | Controls the document–topic density | A **low α** produces documents dominated by few topics; a **high α** produces documents that are a uniform mixture of many topics |
-| **β** (beta) | Controls the topic–word density | A **low β** produces topics focused on a small set of words; a **high β** produces topics that spread probability across many words |
-| **K** | Number of topics | Determines the granularity of discovered themes |
-
 > **Why "Dirichlet"?** The Dirichlet distribution is the conjugate prior for the multinomial distribution, which makes Bayesian inference tractable. It naturally produces sparse distributions — exactly what we want when most documents cover only a few topics and most topics use only a subset of the vocabulary.
 
 ### LDA in This Project
