@@ -1,51 +1,78 @@
-import joblib
+from transformers import GPT2Tokenizer, GPT2LMHeadModel
+import torch
 import os
-import gdown 
+import gdown
+
+# --------------------------------------------------
+# PATHS
+# --------------------------------------------------
+
 MODEL_DIR = "models"
-MODEL_PATH = os.path.join(MODEL_DIR, "gpt2_model.joblib")
-TOKENIZER_PATH = os.path.join(MODEL_DIR, "gpt2_tokenizer.joblib")
+GPT2_DIR = os.path.join(MODEL_DIR, "gpt2")
 
-MODEL_URL = "https://drive.google.com/uc?id=1F6X8eqzENHQEFdp9BfgN6U87NrJ1ev8P"
-TOKENIZER_URL = "https://drive.google.com/uc?id=1q0ehm32BF32FGTyifVuOWtHvgQtDzahe"
+# Google Drive zip link (replace with your file id)
+MODEL_URL = "https://drive.google.com/uc?id=12Ioprj1RJ0uzigNiZ9S8qdBywyCJ_DpQ"
+
+ZIP_PATH = os.path.join(MODEL_DIR, "gpt2.zip")
 
 
-def download_models():
+# --------------------------------------------------
+# DOWNLOAD MODEL IF NOT EXISTS
+# --------------------------------------------------
 
-    os.makedirs(MODEL_DIR, exist_ok=True)
+def download_model():
 
-    if not os.path.exists(MODEL_PATH):
-        gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
+    if not os.path.exists(GPT2_DIR):
 
-    if not os.path.exists(TOKENIZER_PATH):
-        gdown.download(TOKENIZER_URL, TOKENIZER_PATH, quiet=False)
+        os.makedirs(MODEL_DIR, exist_ok=True)
 
+        if not os.path.exists(ZIP_PATH):
+            gdown.download(MODEL_URL, ZIP_PATH, quiet=False)
+
+        import zipfile
+        with zipfile.ZipFile(ZIP_PATH, 'r') as zip_ref:
+            zip_ref.extractall(MODEL_DIR)
+
+
+# --------------------------------------------------
+# LOAD GENERATOR
+# --------------------------------------------------
 
 def load_generator():
 
-    download_models()
+    download_model()
 
-    tokenizer = joblib.load(TOKENIZER_PATH)
-    model = joblib.load(MODEL_PATH)
+    tokenizer = GPT2Tokenizer.from_pretrained(GPT2_DIR)
+    model = GPT2LMHeadModel.from_pretrained(GPT2_DIR)
+
+    tokenizer.pad_token = tokenizer.eos_token
+    model.eval()
 
     return tokenizer, model
 
+
+# --------------------------------------------------
+# TEXT GENERATION
+# --------------------------------------------------
 
 def generate_text(prompt, tokenizer, model, max_len,
                   temperature=1.0, top_k=80, top_p=0.95):
 
     inputs = tokenizer.encode(prompt, return_tensors="pt")
 
-    output = model.generate(
-        inputs,
-        max_length=max_len,
-        min_length=40,
-        do_sample=True,
-        temperature=float(temperature),
-        top_k=int(top_k),
-        top_p=float(top_p),
-        repetition_penalty=1.2,
-        no_repeat_ngram_size=3,
-        pad_token_id=tokenizer.eos_token_id
-    )
+    with torch.no_grad():
+
+        output = model.generate(
+            inputs,
+            max_length=max_len,
+            do_sample=True,
+            temperature=float(temperature),
+            top_k=int(top_k),
+            top_p=float(top_p),
+            repetition_penalty=1.2,
+            no_repeat_ngram_size=3,
+            pad_token_id=tokenizer.eos_token_id,
+            eos_token_id=tokenizer.eos_token_id
+        )
 
     return tokenizer.decode(output[0], skip_special_tokens=True)
