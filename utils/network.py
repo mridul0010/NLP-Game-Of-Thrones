@@ -1,4 +1,13 @@
+import joblib
 import networkx as nx
+
+
+def load_character_graph():
+
+    G = joblib.load("models/character_graph.joblib")
+
+    return G
+
 
 def build_character_graph(doc):
 
@@ -13,11 +22,11 @@ def build_character_graph(doc):
         ]
 
         for i in range(len(names)):
-            for j in range(i+1,len(names)):
+            for j in range(i + 1, len(names)):
 
-                if G.has_edge(names[i],names[j]):
+                if G.has_edge(names[i], names[j]):
                     G[names[i]][names[j]]["weight"] += 1
                 else:
-                    G.add_edge(names[i],names[j],weight=1)
+                    G.add_edge(names[i], names[j], weight=1)
 
     return G
