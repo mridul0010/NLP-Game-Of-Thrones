@@ -1,14 +1,19 @@
 import streamlit as st
-import spacy
+import joblib
 import networkx as nx
 import pandas as pd
 import matplotlib.pyplot as plt
-import joblib
+from wordcloud import WordCloud
+from pyvis.network import Network
+import streamlit.components.v1 as components
+import os
+import spacy
 
 from utils.loader import load_text
 from utils.network import load_character_graph
 from utils.topic_model import run_lda
 from utils.generator import load_generator, generate_text
+
 
 # --------------------------------------------------
 # PAGE CONFIG
@@ -18,20 +23,27 @@ st.set_page_config(
     page_title="Game of Thrones NLP Dashboard",
     page_icon="⚔️",
     layout="wide"
-) 
+)
 
 st.title("⚔️ Game of Thrones NLP Dashboard")
 
-st.markdown(
-"""
+st.markdown("""
 Analyze **A Song of Ice and Fire** using:
 
 • Word Frequency Analysis  
+• Word Cloud Visualization  
 • Character Relationship Networks  
+• Character Importance Ranking  
 • Topic Modeling (LDA)  
 • GPT-2 Story Generation
-"""
-)
+""")
+
+# --------------------------------------------------
+# PATH SETUP (important for deployment)
+# --------------------------------------------------
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODELS_DIR = os.path.join(BASE_DIR, "models")
 
 # --------------------------------------------------
 # LOAD DATA
@@ -39,8 +51,7 @@ Analyze **A Song of Ice and Fire** using:
 
 text_data, tokens = load_text()
 
-# Load precomputed frequency
-freq = joblib.load("models/word_freq.joblib")
+freq = joblib.load(os.path.join(MODELS_DIR, "word_freq.joblib"))
 
 # --------------------------------------------------
 # LOAD MODELS
@@ -49,7 +60,7 @@ freq = joblib.load("models/word_freq.joblib")
 @st.cache_resource
 def load_models():
 
-    nlp = joblib.load("models/spacy_model.joblib")
+    nlp = spacy.load("en_core_web_sm")
 
     tokenizer, model = load_generator()
 
@@ -61,7 +72,7 @@ def load_models():
 nlp, tokenizer, model, G = load_models()
 
 # --------------------------------------------------
-# SIDEBAR SETTINGS
+# SIDEBAR
 # --------------------------------------------------
 
 st.sidebar.header("⚙️ Settings")
@@ -78,7 +89,7 @@ num_topics = st.sidebar.slider(
 # --------------------------------------------------
 
 tab1, tab2, tab3, tab4 = st.tabs(
-["📊 Statistics","👥 Characters","🧠 Topics","✍️ GPT-2 Generator"]
+    ["📊 Statistics", "👥 Characters", "🧠 Topics", "✍️ GPT-2 Generator"]
 )
 
 # --------------------------------------------------
@@ -97,50 +108,67 @@ with tab1:
 
     df = pd.DataFrame(
         freq.most_common(20),
-        columns=["Word","Count"]
+        columns=["Word", "Count"]
     )
 
     st.subheader("Top 20 Words")
 
     st.bar_chart(df.set_index("Word"))
 
+    # Word Cloud
+    st.subheader("Word Cloud")
+
+    wc = WordCloud(
+        width=800,
+        height=400,
+        background_color="black"
+    ).generate(" ".join(tokens))
+
+    fig, ax = plt.subplots()
+    ax.imshow(wc)
+    ax.axis("off")
+
+    st.pyplot(fig)
+
 # --------------------------------------------------
-# CHARACTER GRAPH
+# CHARACTER TAB
 # --------------------------------------------------
 
 with tab2:
 
-    st.subheader("Character Relationship Graph")
+    st.subheader("Character Relationship Network")
 
-    st.write("Characters detected:", len(G.nodes()))
-
-    if len(G.nodes()) > 20:
-
-        top_nodes = sorted(
-            G.degree,
-            key=lambda x: x[1],
-            reverse=True
-        )[:20]
-
-        names = [n[0] for n in top_nodes]
-
-        G = G.subgraph(names)
-
-    fig, ax = plt.subplots(figsize=(8,6))
-
-    pos = nx.spring_layout(G)
-
-    nx.draw(
-        G,
-        pos,
-        with_labels=True,
-        node_size=2000,
-        node_color="gold",
-        font_size=9,
-        ax=ax
+    net = Network(
+        height="600px",
+        width="100%",
+        bgcolor="#111111",
+        font_color="white"
     )
 
-    st.pyplot(fig)
+    for node in G.nodes():
+        net.add_node(node, label=node)
+
+    for edge in G.edges(data=True):
+        net.add_edge(edge[0], edge[1], value=edge[2]["weight"])
+
+    net.repulsion(node_distance=200)
+
+    net.save_graph("graph.html")
+
+    with open("graph.html", "r", encoding="utf-8") as f:
+        components.html(f.read(), height=600)
+
+    # Character Importance
+    st.subheader("Most Important Characters")
+
+    centrality = nx.degree_centrality(G)
+
+    df = pd.DataFrame(
+        sorted(centrality.items(), key=lambda x: x[1], reverse=True),
+        columns=["Character", "Importance"]
+    )
+
+    st.dataframe(df.head(10))
 
 # --------------------------------------------------
 # TOPIC MODELING
@@ -151,11 +179,8 @@ with tab3:
     st.subheader("Topic Modeling (LDA)")
 
     if len(tokens) == 0:
-
-        st.warning("No tokens available for topic modeling")
-
+        st.warning("No tokens available")
     else:
-
         topics = run_lda(tokens, num_topics)
 
         for t in topics:
@@ -181,7 +206,7 @@ with tab4:
     with col1:
 
         temperature = st.slider(
-            "Temperature (Creativity)",
+            "Temperature",
             0.5,
             1.5,
             1.0,
@@ -198,14 +223,14 @@ with tab4:
     with col2:
 
         top_k = st.slider(
-            "Top-K Sampling",
+            "Top K",
             10,
             100,
             80
         )
 
         top_p = st.slider(
-            "Top-P (Nucleus Sampling)",
+            "Top P",
             0.5,
             1.0,
             0.95,
@@ -215,10 +240,11 @@ with tab4:
     if st.button("Generate Story"):
 
         if prompt.strip() == "":
-            st.warning("Please enter a story prompt.")
+            st.warning("Please enter a prompt")
+
         else:
 
-            with st.spinner("The maesters are forging the text..."):
+            with st.spinner("Generating story..."):
 
                 result = generate_text(
                     prompt,
@@ -230,7 +256,6 @@ with tab4:
                     top_p=top_p
                 )
 
-            st.success("Story Generated!")
+            st.success("Story Generated")
+
             st.write(result)
-
-
