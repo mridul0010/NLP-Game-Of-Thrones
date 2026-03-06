@@ -179,6 +179,19 @@ The dashboard will open at `http://localhost:8501`.
 
 ---
 
+### **Project Link**
+```bash
+https://nlp-game-of-thrones.streamlit.app/
+```
+
+---
+
+### **📊 Screenshots**
+
+
+
+
+---
 ## 🖥️ Usage
 
 1. **Statistics tab** — Browse text metrics and visualize the most frequent words.
@@ -205,6 +218,14 @@ The dashboard will open at `http://localhost:8501`.
 
 ---
 
-## 📄 License
+Mridul Lata
 
-This project is licensed under the **GNU General Public License v3.0** — see the [LICENSE](./LICENSE) file for details.
+📍 Jaipur, India
+
+💼 Aspiring Data Scientist
+
+🔗 www.linkedin.com/in/mridullata
+
+🔗 https://github.com/mridul0010/NLP-Game-Of-Thrones
+
+🔗 https://nlp-game-of-thrones.streamlit.app/
