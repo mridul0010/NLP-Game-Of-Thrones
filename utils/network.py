@@ -1,6 +1,9 @@
 import joblib
 import networkx as nx
 
+# ---------------------------------------------
+# Load pre-built character graph
+# ---------------------------------------------
 
 def load_character_graph():
 
@@ -8,6 +11,10 @@ def load_character_graph():
 
     return G
 
+
+# ---------------------------------------------
+# Optional: rebuild graph if needed
+# ---------------------------------------------
 
 def build_character_graph(doc):
 
