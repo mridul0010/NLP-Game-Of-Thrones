@@ -1,12 +1,12 @@
 import streamlit as st
 import spacy
 import networkx as nx
-from collections import Counter
 import pandas as pd
 import matplotlib.pyplot as plt
+import joblib
 
 from utils.loader import load_text
-from utils.network import build_character_graph
+from utils.network import load_character_graph
 from utils.topic_model import run_lda
 from utils.generator import load_generator, generate_text
 
@@ -18,7 +18,7 @@ st.set_page_config(
     page_title="Game of Thrones NLP Dashboard",
     page_icon="⚔️",
     layout="wide"
-)
+) 
 
 st.title("⚔️ Game of Thrones NLP Dashboard")
 
@@ -39,30 +39,32 @@ Analyze **A Song of Ice and Fire** using:
 
 text_data, tokens = load_text()
 
+# Load precomputed frequency
+freq = joblib.load("models/word_freq.joblib")
+
 # --------------------------------------------------
 # LOAD MODELS
 # --------------------------------------------------
 
 @st.cache_resource
 def load_models():
-    nlp = spacy.load("en_core_web_sm")
-    tokenizer, model = load_generator()
-    return nlp, tokenizer, model
 
-nlp, tokenizer, model = load_models()
+    nlp = joblib.load("models/spacy_model.joblib")
+
+    tokenizer, model = load_generator()
+
+    G = load_character_graph()
+
+    return nlp, tokenizer, model, G
+
+
+nlp, tokenizer, model, G = load_models()
 
 # --------------------------------------------------
 # SIDEBAR SETTINGS
 # --------------------------------------------------
 
 st.sidebar.header("⚙️ Settings")
-
-sample_size = st.sidebar.slider(
-    "Text Sample Size",
-    20000,
-    200000,
-    100000
-)
 
 num_topics = st.sidebar.slider(
     "Number of Topics",
@@ -93,18 +95,14 @@ with tab1:
     col2.metric("Words", len(tokens))
     col3.metric("Vocabulary Size", len(set(tokens)))
 
-    if len(tokens) > 0:
+    df = pd.DataFrame(
+        freq.most_common(20),
+        columns=["Word","Count"]
+    )
 
-        freq = Counter(tokens)
+    st.subheader("Top 20 Words")
 
-        df = pd.DataFrame(
-            freq.most_common(20),
-            columns=["Word","Count"]
-        )
-
-        st.subheader("Top 20 Words")
-
-        st.bar_chart(df.set_index("Word"))
+    st.bar_chart(df.set_index("Word"))
 
 # --------------------------------------------------
 # CHARACTER GRAPH
@@ -113,10 +111,6 @@ with tab1:
 with tab2:
 
     st.subheader("Character Relationship Graph")
-
-    doc = nlp(text_data[:sample_size])
-
-    G = build_character_graph(doc)
 
     st.write("Characters detected:", len(G.nodes()))
 
@@ -171,8 +165,8 @@ with tab3:
 # GPT-2 GENERATOR
 # --------------------------------------------------
 
-
 with tab4:
+
     st.subheader("GPT-2 Story Generator")
 
     prompt = st.text_area(
@@ -180,27 +174,61 @@ with tab4:
         "The night was cold and the wall stood silent..."
     )
 
-    # UI Controls for dynamic parameters
+    st.markdown("### Generation Controls")
+
     col1, col2 = st.columns(2)
+
     with col1:
-        # Match argument name 'temperature' from generator.py
-        temp_val = st.slider("Temperature (Creativity)", 0.1, 1.5, 0.9, 0.1)
-        max_len = st.slider("Story Length", 50, 500, 120)
-    
+
+        temperature = st.slider(
+            "Temperature (Creativity)",
+            0.5,
+            1.5,
+            1.0,
+            0.05
+        )
+
+        max_len = st.slider(
+            "Story Length",
+            50,
+            500,
+            150
+        )
+
     with col2:
-        top_k_val = st.slider("Top K", 1, 100, 50)
-        top_p_val = st.slider("Top P (Nucleus Sampling)", 0.0, 1.0, 0.95, 0.05)
+
+        top_k = st.slider(
+            "Top-K Sampling",
+            10,
+            100,
+            80
+        )
+
+        top_p = st.slider(
+            "Top-P (Nucleus Sampling)",
+            0.5,
+            1.0,
+            0.95,
+            0.05
+        )
 
     if st.button("Generate Story"):
-        with st.spinner("The maesters are forging the text..."):
-            # CORRECTION: Passing temperature, top_k, and top_p to match your generator.py
-            result = generate_text(
-                prompt,
-                tokenizer,
-                model,
-                max_len,
-                temperature=temp_val, 
-                top_k=top_k_val,
-                top_p=top_p_val
-            )
-        st.success(result)
+
+        if prompt.strip() == "":
+            st.warning("Please enter a story prompt.")
+        else:
+
+            with st.spinner("The maesters are forging the text..."):
+
+                result = generate_text(
+                    prompt,
+                    tokenizer,
+                    model,
+                    max_len,
+                    temperature=temperature,
+                    top_k=top_k,
+                    top_p=top_p
+                )
+
+            st.success("Story Generated!")
+            st.write(result)
