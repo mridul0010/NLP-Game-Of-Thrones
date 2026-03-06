@@ -17,6 +17,10 @@
 
 - [Why This Project?](#-why-this-project)
 - [Features](#-features)
+- [Understanding LDA Topic Modeling](#-understanding-lda-topic-modeling)
+  - [What Is LDA?](#what-is-lda)
+  - [How LDA Works](#how-lda-works)
+  - [LDA in This Project](#lda-in-this-project)
 - [Understanding the Generation Controls](#-understanding-the-generation-controls)
   - [Temperature](#temperature)
   - [Top-K Sampling](#top-k-sampling)
@@ -51,6 +55,50 @@ This project bundles all of these capabilities into a single, interactive Stream
 | **👥 Characters** | Interactive force-directed character relationship network graph and a top-10 character importance ranking (degree centrality) |
 | **🧠 Topics** | Adjustable LDA topic modeling (2–10 topics) to surface recurring themes across the books |
 | **✍️ GPT-2 Generator** | GPT-2-powered story generator with real-time controls for Temperature, Top-K, Top-P, and story length |
+
+---
+
+## 🔍 Understanding LDA Topic Modeling
+
+### What Is LDA?
+
+**Latent Dirichlet Allocation (LDA)** is an unsupervised machine-learning technique that discovers hidden (*latent*) topics within a collection of documents. Each "topic" is represented as a probability distribution over words, and each document is modeled as a mixture of topics. In plain terms, LDA reads through a large body of text and answers the question: *"What recurring themes run through this corpus?"*
+
+> **Analogy:** Imagine sorting thousands of pages into unlabeled folders. LDA finds natural groupings — one folder might be dominated by words like *sword, battle, army*, while another might contain *king, throne, crown* — without anyone telling it what topics to look for.
+
+### How LDA Works
+
+LDA follows a generative probabilistic process:
+
+1. **Choose the number of topics (K)** — You decide how many topics the model should discover (in this project, adjustable from 2 to 10 via the sidebar).
+2. **Assign words to topics** — The algorithm initially assigns every word in every document to a random topic.
+3. **Iteratively refine** — Over many passes, LDA updates assignments by asking two questions for each word:
+   - *How common is this topic in the current document?*
+   - *How common is this word across the topic overall?*
+4. **Converge** — After enough iterations the assignments stabilize, and each topic emerges as a coherent cluster of related words.
+
+| Concept | Meaning |
+|---------|---------|
+| **Topic** | A distribution over words (e.g., Topic 1: *tyrion 0.08, dany 0.06, arya 0.05, …*) |
+| **Document–topic distribution** | How much each document "belongs" to each topic |
+| **Word–topic distribution** | How strongly each word is associated with each topic |
+
+### LDA in This Project
+
+The full preprocessing and training pipeline (implemented in `got.ipynb`) works as follows:
+
+| Step | Detail |
+|------|--------|
+| **Tokenization** | The combined book text is split into documents of 800 tokens each |
+| **Bigram detection** | Gensim `Phrases` identifies frequent two-word collocations (e.g., *hot_pie*, *king_landing*) with `min_count=5` and `threshold=10` |
+| **Dictionary building** | A Gensim `Dictionary` maps words to IDs, filtering out words that appear in fewer than 5 documents (`no_below=5`) or more than 40% of documents (`no_above=0.4`) |
+| **TF-IDF weighting** | A TF-IDF model re-weights the bag-of-words corpus so that common-but-unimportant words are down-weighted |
+| **LDA training** | `gensim.models.LdaModel` is trained with **5 default topics**, **30 passes**, and `random_state=42` for reproducibility |
+| **Serialization** | The trained model (`lda_model.joblib`) and dictionary (`lda_dictionary.joblib`) are saved to the `models/` directory |
+
+At runtime the Streamlit dashboard loads the pre-trained model and lets you **interactively choose 2–10 topics** with a sidebar slider. For each topic, the top 10 most representative words are displayed so you can interpret the underlying theme.
+
+> **Tip:** Try different topic counts to see how themes split or merge. With fewer topics you get broad themes (e.g., "battles" vs. "politics"); with more topics, finer-grained distinctions appear (e.g., individual character arcs).
 
 ---
 
