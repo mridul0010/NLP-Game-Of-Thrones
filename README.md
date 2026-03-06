@@ -20,7 +20,6 @@
 - [Understanding LDA Topic Modeling](#-understanding-lda-topic-modeling)
   - [What Is LDA?](#what-is-lda)
   - [How LDA Works](#how-lda-works)
-  - [The Math Behind LDA](#the-math-behind-lda)
   - [LDA in This Project](#lda-in-this-project)
   - [Interpreting LDA Results](#interpreting-lda-results)
 - [Understanding the Generation Controls](#-understanding-the-generation-controls)
