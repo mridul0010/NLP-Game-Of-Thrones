@@ -6,12 +6,10 @@ import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 from pyvis.network import Network
 import streamlit.components.v1 as components
-import os
 import spacy
 
 from utils.loader import load_text
 from utils.network import load_character_graph
-from utils.topic_model import run_lda
 from utils.generator import load_generator, generate_text
 
 
@@ -33,17 +31,10 @@ Analyze **A Song of Ice and Fire** using:
 • Word Frequency Analysis  
 • Word Cloud Visualization  
 • Character Relationship Networks  
-• Character Importance Ranking  
-• Topic Modeling (LDA)  
+• Topic Modeling  
 • GPT-2 Story Generation
 """)
 
-# --------------------------------------------------
-# PATH SETUP (important for deployment)
-# --------------------------------------------------
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODELS_DIR = os.path.join(BASE_DIR, "models")
 
 # --------------------------------------------------
 # LOAD DATA
@@ -51,7 +42,8 @@ MODELS_DIR = os.path.join(BASE_DIR, "models")
 
 text_data, tokens = load_text()
 
-freq = joblib.load(os.path.join(MODELS_DIR, "word_freq.joblib"))
+freq = joblib.load("models/word_freq.joblib")
+
 
 # --------------------------------------------------
 # LOAD MODELS
@@ -66,10 +58,15 @@ def load_models():
 
     G = load_character_graph()
 
-    return nlp, tokenizer, model, G
+    lda = joblib.load("models/lda_model.joblib")
+
+    dictionary = joblib.load("models/lda_dictionary.joblib")
+
+    return nlp, tokenizer, model, G, lda, dictionary
 
 
-nlp, tokenizer, model, G = load_models()
+nlp, tokenizer, model, G, lda, dictionary = load_models()
+
 
 # --------------------------------------------------
 # SIDEBAR
@@ -84,6 +81,7 @@ num_topics = st.sidebar.slider(
     5
 )
 
+
 # --------------------------------------------------
 # TABS
 # --------------------------------------------------
@@ -91,6 +89,7 @@ num_topics = st.sidebar.slider(
 tab1, tab2, tab3, tab4 = st.tabs(
     ["📊 Statistics", "👥 Characters", "🧠 Topics", "✍️ GPT-2 Generator"]
 )
+
 
 # --------------------------------------------------
 # STATISTICS TAB
@@ -115,7 +114,6 @@ with tab1:
 
     st.bar_chart(df.set_index("Word"))
 
-    # Word Cloud
     st.subheader("Word Cloud")
 
     wc = WordCloud(
@@ -125,13 +123,15 @@ with tab1:
     ).generate(" ".join(tokens))
 
     fig, ax = plt.subplots()
+
     ax.imshow(wc)
     ax.axis("off")
 
     st.pyplot(fig)
 
+
 # --------------------------------------------------
-# CHARACTER TAB
+# CHARACTER NETWORK
 # --------------------------------------------------
 
 with tab2:
@@ -158,17 +158,21 @@ with tab2:
     with open("graph.html", "r", encoding="utf-8") as f:
         components.html(f.read(), height=600)
 
-    # Character Importance
     st.subheader("Most Important Characters")
 
     centrality = nx.degree_centrality(G)
 
     df = pd.DataFrame(
-        sorted(centrality.items(), key=lambda x: x[1], reverse=True),
+        sorted(
+            centrality.items(),
+            key=lambda x: x[1],
+            reverse=True
+        ),
         columns=["Character", "Importance"]
     )
 
     st.dataframe(df.head(10))
+
 
 # --------------------------------------------------
 # TOPIC MODELING
@@ -176,15 +180,24 @@ with tab2:
 
 with tab3:
 
-    st.subheader("Topic Modeling (LDA)")
+    st.subheader("Topic Modeling")
 
-    if len(tokens) == 0:
-        st.warning("No tokens available")
-    else:
-        topics = run_lda(tokens, num_topics)
+    topics = lda.show_topics(
+        num_topics=num_topics,
+        num_words=10,
+        formatted=False
+    )
 
-        for t in topics:
-            st.info(t)
+    for topic_id, words in topics:
+
+        word_list = [word for word, prob in words]
+
+        st.markdown(
+            f"### Topic {topic_id + 1}"
+        )
+
+        st.write(", ".join(word_list))
+
 
 # --------------------------------------------------
 # GPT-2 GENERATOR
@@ -199,63 +212,48 @@ with tab4:
         "The night was cold and the wall stood silent..."
     )
 
-    st.markdown("### Generation Controls")
+    temperature = st.slider(
+        "Temperature",
+        0.5,
+        1.5,
+        1.0
+    )
 
-    col1, col2 = st.columns(2)
+    max_len = st.slider(
+        "Story Length",
+        50,
+        500,
+        150
+    )
 
-    with col1:
+    top_k = st.slider(
+        "Top K",
+        10,
+        100,
+        80
+    )
 
-        temperature = st.slider(
-            "Temperature",
-            0.5,
-            1.5,
-            1.0,
-            0.05
-        )
-
-        max_len = st.slider(
-            "Story Length",
-            50,
-            500,
-            150
-        )
-
-    with col2:
-
-        top_k = st.slider(
-            "Top K",
-            10,
-            100,
-            80
-        )
-
-        top_p = st.slider(
-            "Top P",
-            0.5,
-            1.0,
-            0.95,
-            0.05
-        )
+    top_p = st.slider(
+        "Top P",
+        0.5,
+        1.0,
+        0.95
+    )
 
     if st.button("Generate Story"):
 
-        if prompt.strip() == "":
-            st.warning("Please enter a prompt")
+        with st.spinner("Generating story..."):
 
-        else:
+            result = generate_text(
+                prompt,
+                tokenizer,
+                model,
+                max_len,
+                temperature,
+                top_k,
+                top_p
+            )
 
-            with st.spinner("Generating story..."):
+        st.success("Story Generated")
 
-                result = generate_text(
-                    prompt,
-                    tokenizer,
-                    model,
-                    max_len,
-                    temperature=temperature,
-                    top_k=top_k,
-                    top_p=top_p
-                )
-
-            st.success("Story Generated")
-
-            st.write(result)
+        st.write(result)
