@@ -54,9 +54,9 @@ def generate_text(
         prompt,
         tokenizer,
         model,
-        max_len=150,
-        temperature=1.0,
-        top_k=80,
+        max_len=200,
+        temperature=0.90,
+        top_k=50,
         top_p=0.95
 ):
 
@@ -78,3 +78,4 @@ def generate_text(
         )
 
     return tokenizer.decode(output[0], skip_special_tokens=True)
+
