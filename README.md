@@ -249,7 +249,22 @@ The dashboard will open at `http://localhost:8501`.
 
 ### 📊 Screenshots
 
-*Screenshots coming soon — run the dashboard locally or visit the [live demo](https://nlp-game-of-thrones.streamlit.app/) to see it in action.*
+<img width="1211" height="632" alt="image" src="https://github.com/user-attachments/assets/c695350d-126c-481b-b4c7-5d48865cdfdb" />
+
+<img width="1456" height="534" alt="image" src="https://github.com/user-attachments/assets/718b9713-f0dd-44e2-806d-cfc20a2b105a" />
+
+<img width="1459" height="803" alt="image" src="https://github.com/user-attachments/assets/3a3b7481-cc15-408e-b6b1-a74bcfdef7c5" />
+
+<img width="1452" height="881" alt="image" src="https://github.com/user-attachments/assets/618b82ff-4f42-4d64-8b0c-255a15115703" />
+
+<img width="1379" height="583" alt="image" src="https://github.com/user-attachments/assets/fd5dfbdf-ba73-41bb-80ba-e85540ae479d" />
+
+<img width="1474" height="1039" alt="image" src="https://github.com/user-attachments/assets/5e867409-8d87-4f38-a4d3-e9c8678cfa6c" />
+
+<img width="1482" height="959" alt="image" src="https://github.com/user-attachments/assets/ca0018e8-ffbb-4b51-8d5b-32e0f334f201" />
+
+
+
 
 ---
 
