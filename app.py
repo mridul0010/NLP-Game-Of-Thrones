@@ -210,8 +210,8 @@ with tab4:
     prompt = st.text_area(
         "Start the story",
         """Beyond the frozen Wall, Jon Snow and Ghost walked through the silent forest.
-         The wind carried whispers of something ancient moving in the darkness.
-         Suddenly, Jon saw blue eyes glowing between the trees."""
+The wind carried whispers of something ancient moving in the darkness.
+Suddenly, Jon saw blue eyes glowing between the trees."""
     )
 
     temperature = st.slider(
@@ -259,5 +259,6 @@ with tab4:
         st.success("Story Generated")
 
         st.write(result)
+
 
 
