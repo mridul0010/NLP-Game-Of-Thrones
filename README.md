@@ -264,11 +264,11 @@ The dashboard will open at `http://localhost:8501`.
 <img width="1482" height="959" alt="image" src="https://github.com/user-attachments/assets/ca0018e8-ffbb-4b51-8d5b-32e0f334f201" />
 
 
-> **Best Prompt Formula**
-  - SETTING
-  - CHARACTER
-  - PROBLEM
-  - TENSION
+***Best Prompt Formula***
+  > SETTING
+  > CHARACTER
+  > PROBLEM
+  > TENSION
 ---
 
 ## 🖥️ Usage
