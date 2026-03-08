@@ -125,7 +125,7 @@ When the GPT-2 model generates text, it predicts a probability distribution over
 | | |
 |---|---|
 | **Range** | 0.5 – 1.5 |
-| **Default** | 1.0 |
+| **Default** | 0.90 |
 
 Temperature **scales** the raw logits (scores) before they are converted into probabilities.
 
@@ -140,14 +140,14 @@ Temperature **scales** the raw logits (scores) before they are converted into pr
 | | |
 |---|---|
 | **Range** | 10 – 100 |
-| **Default** | 80 |
+| **Default** | 50 |
 
 Top-K sampling restricts the model to only consider the **K most probable** tokens at each step. All other tokens are discarded before sampling.
 
 - **Low K (e.g., 10)** — Only a handful of tokens are candidates, leading to highly focused and repetitive text.
 - **High K (e.g., 100)** — A larger pool of tokens is available, allowing more diversity.
 
-> **Example:** If the vocabulary has 50,000 tokens and K = 80, the model ignores 49,920 tokens and samples only from the top 80.
+> **Example:** If the vocabulary has 50,000 tokens and K = 50, the model ignores 49,950 tokens and samples only from the top 50.
 
 ### Top-P (Nucleus) Sampling
 
@@ -179,7 +179,8 @@ Additionally, a **repetition penalty (1.2)** discourages the model from repeatin
 |---------|--------|
 | Low temperature + Low K + Low P | Very safe, predictable, and repetitive |
 | High temperature + High K + High P | Highly creative but potentially incoherent |
-| **Default (1.0 / 80 / 0.95)** | **Balanced creativity and coherence** |
+| Default (0.9 / 200 / 50 / 0.95) | **Cinematic** story generation with **good creativity** and **coherence** |
+
 
 ---
 
