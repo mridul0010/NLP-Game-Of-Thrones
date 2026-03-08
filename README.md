@@ -266,8 +266,11 @@ The dashboard will open at `http://localhost:8501`.
 
 ***Best Prompt Formula***
   > SETTING
+
   > CHARACTER
+
   > PROBLEM
+
   > TENSION
 ---
 
