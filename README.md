@@ -7,7 +7,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.x-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
 [![Transformers](https://img.shields.io/badge/HuggingFace-Transformers-yellow?logo=huggingface&logoColor=white)](https://huggingface.co/docs/transformers)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-green.svg)](./LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 </div>
 
@@ -203,7 +203,7 @@ NLP-Game-Of-Thrones/
 ├── models/                 # Pre-trained models (joblib / GPT-2 weights)
 ├── got.ipynb               # Jupyter notebook for experimentation
 ├── requirements.txt        # Python dependencies
-└── LICENSE                 # GPL-3.0
+└── LICENSE                 # MIT
 ```
 
 ---
@@ -303,7 +303,7 @@ The dashboard will open at `http://localhost:8501`.
 
 ## 📝 License
 
-This project is licensed under the **GNU General Public License v3.0** — see the [LICENSE](./LICENSE) file for details.
+This project is licensed under the **MIT License** — see the [LICENSE](./LICENSE) file for details.
 
 ---
 
