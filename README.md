@@ -250,6 +250,9 @@ The dashboard will open at `http://localhost:8501`.
 
 ### 📊 Screenshots
 
+<details>
+<summary>Click to view screenshots</summary>
+
 <img width="1211" height="632" alt="image" src="https://github.com/user-attachments/assets/c695350d-126c-481b-b4c7-5d48865cdfdb" />
 
 <img width="1456" height="534" alt="image" src="https://github.com/user-attachments/assets/718b9713-f0dd-44e2-806d-cfc20a2b105a" />
@@ -273,6 +276,9 @@ The dashboard will open at `http://localhost:8501`.
   > PROBLEM
 
   > TENSION
+
+</details>
+
 ---
 
 ## 🖥️ Usage
